@@ -1,4 +1,4 @@
-module Maze(Row, Col, Point, Path, Maze, Paths(..), entrance, exit, search) where
+module Maze(Row, Col, Point, Path, Maze, Paths(..), entrance, exit, search, solution) where
 
 type Row = Int
 type Col = Int
@@ -35,6 +35,16 @@ search' m p
   | insideMaze m (last p) && isEmpty m (last p) = search m p
   | otherwise = Deadend (last p)
 
+solution :: Paths -> Path -> Path
+solution (Exit n) p = [n]
+solution (MazeNode n r d l u) p
+  | [] /= solution r p = [n] ++ solution r p
+  | [] /= solution d p = [n] ++ solution d p
+  | [] /= solution l p = [n] ++ solution l p
+  | [] /= solution u p = [n] ++ solution u p
+  | otherwise = []
+solution (Deadend _)  p = []
+
 hasBeenThere :: Maze -> Path -> Bool
 hasBeenThere m path = (last path) `elem` (init path)
 
@@ -43,7 +53,6 @@ foundExit m path = let (c,r) = (last path) in (c,r) == exit
 
 isEmpty :: Maze -> Point -> Bool
 isEmpty maze (r,c) = maze !! r !! c == ' '
-isEmpty _ _ = False
 
 insideMaze :: Maze -> Point -> Bool
 insideMaze maze (r,c) = r < length maze && r >= 0 && c < length (maze !! r) && c >= 0

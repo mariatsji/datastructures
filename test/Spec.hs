@@ -21,3 +21,7 @@ main = hspec $ do
     it "searches a maze " $ do
       let s = M.search maze1 [M.entrance]
       print s
+    it "prints the path to the solved maze" $ do
+      let s = M.search maze1 [M.entrance]
+      let sol = M.solution s [M.entrance]
+      print sol
