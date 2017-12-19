@@ -19,5 +19,5 @@ main = hspec $ do
       print "yo"
       -- print m
     it "searches a maze " $ do
-      let s = M.search maze1 [M.start]
+      let s = M.search maze1 [M.entrance]
       print s

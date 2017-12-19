@@ -1,17 +1,17 @@
-module Maze(Row, Col, Point, Path, Maze, Paths(..), start, end, search) where
+module Maze(Row, Col, Point, Path, Maze, Paths(..), entrance, exit, search) where
 
 type Row = Int
 type Col = Int
 type Point = (Row, Col)
 type Path = [Point]
 type Maze = [String]
-data Paths = MazeNode Point Paths Paths Paths Paths | Deadend Point deriving (Show, Eq, Ord)
+data Paths = MazeNode Point Paths Paths Paths Paths | Deadend Point | Exit Point deriving (Show, Eq, Ord)
 
-start :: Point
-start = (2,0)
+entrance :: Point
+entrance = (2,0)
 
-end :: Point
-end = (2,4)
+exit :: Point
+exit = (2,4)
 
 right :: Maze -> Path -> Point
 right m p = let (c,r) = last p in (c + 1, r)
@@ -26,27 +26,20 @@ up :: Maze -> Path -> Point
 up m p = let (c,r) =  last p in (c, r - 1)
 
 search :: Maze -> Path -> Paths
-search m p = MazeNode (last p) (searchRight m p) (searchDown m p) (searchLeft m p) (searchUp m p)
+search m p = MazeNode (last p) (search' m (p ++ [right m p])) (search' m (p ++ [down m p])) (search' m (p ++ [left m p])) (search' m (p ++ [up m p]))
 
-searchRight :: Maze -> Path -> Paths
-searchRight m p
-  | insideMaze m (right m p) && isEmpty m (right m p) = MazeNode (right m p) (searchRight m (p ++ [(right m p)])) (searchDown m p) (searchLeft m p) (searchUp m p)
-  | otherwise = Deadend (right m p)
+search' :: Maze -> Path -> Paths
+search' m p
+  | foundExit m p = Exit (last p)
+  | hasBeenThere m p = Deadend (last p)
+  | insideMaze m (last p) && isEmpty m (last p) = search m p
+  | otherwise = Deadend (last p)
 
-searchDown :: Maze -> Path -> Paths
-searchDown m p
-  | insideMaze m (down m p) && isEmpty m (down m p) = MazeNode (down m p) (searchRight m p) (searchDown m (p ++ [(down m p)])) (searchLeft m p) (searchUp m p)
-  | otherwise = Deadend (down m p)
+hasBeenThere :: Maze -> Path -> Bool
+hasBeenThere m path = (last path) `elem` (init path)
 
-searchLeft :: Maze -> Path -> Paths
-searchLeft m p
-  | insideMaze m (left m p) && isEmpty m (left m p) = MazeNode (left m p) (searchRight m p) (searchDown m p) (searchLeft m (p ++ [(left m p)])) (searchUp m p)
-  | otherwise = Deadend (left m p)
-
-searchUp :: Maze -> Path -> Paths
-searchUp m p
-  | insideMaze m (up m p) && isEmpty m (up m p) = MazeNode (up m p) (searchRight m p) (searchDown m p) (searchLeft m p) (searchUp m (p ++ [(up m p)]))
-  | otherwise = Deadend (up m p)
+foundExit :: Maze -> Path -> Bool
+foundExit m path = let (c,r) = (last path) in (c,r) == exit
 
 isEmpty :: Maze -> Point -> Bool
 isEmpty maze (r,c) = maze !! r !! c == ' '
