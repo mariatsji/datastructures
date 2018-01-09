@@ -2,7 +2,7 @@ import Test.Hspec
 import Control.Exception (evaluate)
 
 import Maze as M
-
+import Log
 
 maze1 =[
    "#####"
@@ -10,6 +10,14 @@ maze1 =[
   ,"  #  "
   ,"### #"
   ,"#####"]
+
+maze2 = [
+  "#####"
+ ,"# ###"
+ ,"  ## "
+ ,"# ## "
+ ,"#    "
+  ]
 
 main :: IO ()
 main = hspec $ do
@@ -24,4 +32,5 @@ main = hspec $ do
     it "prints the path to the solved maze" $ do
       let s = M.search maze1 [M.entrance]
       let sol = M.solution s [M.entrance]
+      print $ prettyMaze maze1
       print sol

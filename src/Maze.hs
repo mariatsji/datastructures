@@ -1,4 +1,4 @@
-module Maze(Row, Col, Point, Path, Maze, Paths(..), entrance, exit, search, solution) where
+module Maze(Row, Col, Point, Path, Maze, Paths(..), entrance, exit, search, solution, prettyMaze) where
 
 type Row = Int
 type Col = Int
@@ -38,21 +38,27 @@ search' m p
 solution :: Paths -> Path -> Path
 solution (Exit n) p = [n]
 solution (MazeNode n r d l u) p
-  | [] /= solution r p = [n] ++ solution r p
-  | [] /= solution d p = [n] ++ solution d p
-  | [] /= solution l p = [n] ++ solution l p
-  | [] /= solution u p = [n] ++ solution u p
+  | [] /= solution r p = n : solution r p
+  | [] /= solution d p = n : solution d p
+  | [] /= solution l p = n : solution l p
+  | [] /= solution u p = n : solution u p
   | otherwise = []
 solution (Deadend _)  p = []
 
 hasBeenThere :: Maze -> Path -> Bool
-hasBeenThere m path = (last path) `elem` (init path)
+hasBeenThere m path = last path `elem` init path
 
 foundExit :: Maze -> Path -> Bool
-foundExit m path = let (c,r) = (last path) in (c,r) == exit
+foundExit m path = let (c,r) = last path in (c,r) == exit
 
 isEmpty :: Maze -> Point -> Bool
-isEmpty maze (r,c) = maze !! r !! c == ' '
+isEmpty maze (r,c) = symbolAt maze (r,c) == ' '
+
+symbolAt :: Maze -> Point -> Char
+symbolAt maze (r,c) = maze !! r !! c
 
 insideMaze :: Maze -> Point -> Bool
 insideMaze maze (r,c) = r < length maze && r >= 0 && c < length (maze !! r) && c >= 0
+
+prettyMaze :: Maze -> String
+prettyMaze = unlines
