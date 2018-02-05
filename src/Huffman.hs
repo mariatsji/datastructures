@@ -1,4 +1,4 @@
-module Huffman (Huffman(..), Encoded(..), val, toMap, huffmanTree, encode) where
+module Huffman (Huffman(..), Encoded(..), val, toMap, huffmanTree, encode, decode) where
 
 import qualified Data.Map.Strict as Map
 import qualified Data.List as List
@@ -11,6 +11,17 @@ encode :: String -> Encoded
 encode s = let tree = mkHuffmanTree s
            in Enc (tree, encode' tree s)
 
+decode :: Encoded -> String
+decode (Enc (h, bs)) = decode' h h bs []
+
+-- original complete tree -> partial huffman under examination -> bools to decode -> accumulated chars -> decoded String
+decode' :: Huffman -> Huffman -> [Bool] -> String -> String
+decode' original (Leaf _ c1) bs cs = decode' original original bs (cs ++ [c1])
+decode' original h [] cs = cs
+decode' original (Node _ h1 h2) (b:bs) cs
+  | b = decode' original h2 bs cs
+  | otherwise = decode' original h1 bs cs
+
 encode' :: Huffman -> String -> [Bool]
 encode' h s = s >>= (\c -> encode'' h c [])
 
@@ -22,18 +33,17 @@ mkHuffmanTree :: String -> Huffman
 mkHuffmanTree = huffmanTree . sort' . leafify
 
 huffmanTree :: [Huffman] -> Huffman
-huffmanTree (x:[]) = x
-huffmanTree (x:(y:(z))) = huffmanTree $ Node (val x + val y) x y : z
+huffmanTree [x] = x
+huffmanTree (x:(y:z)) = huffmanTree $ Node (val x + val y) x y : z
 
 sort' :: [Huffman] -> [Huffman]
-sort' hs = List.sortBy comp hs
-  where comp = comparing val
+sort' = List.sortBy $ comparing val
 
 leafify :: String -> [Huffman]
 leafify s = fmap (\(c,i) -> Leaf i c) $ Map.toList $ toMap s
 
 toMap :: String -> Map.Map Char Int
-toMap s = foldl (\a c -> Map.insertWith (+) c 1 a) (Map.empty :: Map.Map Char Int) s
+toMap = foldl (\a c -> Map.insertWith (+) c 1 a) (Map.empty :: Map.Map Char Int)
 
 val :: Huffman -> Int
 val (Leaf i _) = i

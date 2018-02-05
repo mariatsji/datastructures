@@ -20,3 +20,12 @@ main = hspec $ do
     it "encodes a little longer String" $ do
       let e = encode "alfalfa"
       print e
+    it "decodes an encoded String" $ do
+      let s = "abc"
+      let e = encode s
+      print e
+      decode e `shouldBe` s
+    it "decodes a longer text" $ do
+      let s = "There once was a man from Nentucket, he rowed and he rowed all day long. He could not be sworn into office, because he most days was drunk like a Bucket"
+      print (encode s)
+      decode (encode s) `shouldBe` s
