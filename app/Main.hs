@@ -7,7 +7,7 @@ import Data.IORef
 main :: IO ()
 main = do
   ref <- newIORef 0 :: IO (IORef Int)
-  forkIO ( modifyIORef' ref succ )
+  forkIO ( forever (modifyIORef' ref succ) )
   threadDelay 100
   val <- readIORef ref
   print val
