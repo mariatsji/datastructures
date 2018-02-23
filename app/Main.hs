@@ -1,14 +1,10 @@
 module Main where
 
-import Control.Concurrent
-import Control.Monad
-import Data.IORef
+import qualified MonadTransformers as MT
 
 main :: IO ()
 main = do
-  ref <- newIORef 0 :: IO (IORef Int)
-  forkIO ( forever (modifyIORef' ref succ) )
-  threadDelay 100
-  val <- readIORef ref
-  print val
+  ints <- MT.read' $ MT.trav ["hello", "bananas", "this", "works"]
+  mapM_ print ints
+
 

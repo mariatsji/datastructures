@@ -1,37 +1,25 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
-module MonadTransformers (run) where
+module MonadTransformers(trav, read') where
 
 import Control.Monad.Trans
-import Control.Monad.Trans.State as TS
-import Control.Monad.Trans.Writer
+import Control.Monad.Trans (liftIO)
+import Control.Monad.Writer (WriterT, tell, execWriterT)
+import Control.Monad.State
 
-import Control.Monad.State as S
+-- WriterT w m a
+-- StateT  s m a
+type App = WriterT [Int] IO ()
+type App2 = WriterT (StateT [Int] IO ())
+type App3 = StateT (WriterT [Int] IO ())
 
--- StateT
-stateFun :: State String String
-stateFun = S.state (\s -> ("yo", s))
-
-test :: State Int Int
-test = do
-  S.put 3
-  S.modify (+1)
-  S.get
-
-run :: IO ()
-run = print $ S.execState test 0
-
--- MonadTransformers
+len :: String -> IO Int
+len = return . length
 
 
-newtype Stack a = Stack { unStack :: StateT Int (WriterT [Int] IO ) a } deriving (Functor, Applicative, Monad)
+trav :: [String] -> App
+trav l = do
+  ls <- liftIO $ mapM len l
+  tell ls
 
-foo :: Stack ()
-foo = Stack $ do
-  TS.put 1                 -- State layer
-  lift $ tell [2]       -- Writer layer
-  lift $ lift $ print 3 -- IO layer
-  return ()
+read' :: App -> IO [Int]
+read' w = execWriterT w
 
-evalStack :: Stack a -> IO [Int]
-evalStack m = execWriterT (evalStateT (unStack m) 0)
