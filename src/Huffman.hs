@@ -1,8 +1,8 @@
 module Huffman (Huffman(..), Encoded(..), val, toMap, huffmanTree, encode, decode) where
 
+import qualified Data.List       as List
 import qualified Data.Map.Strict as Map
-import qualified Data.List as List
-import Data.Ord
+import           Data.Ord
 
 data Huffman = Leaf Int Char | Node Int Huffman Huffman deriving (Eq, Ord, Show)
 newtype Encoded = Enc (Huffman, [Bool]) deriving (Eq, Ord, Show)
@@ -33,7 +33,7 @@ mkHuffmanTree :: String -> Huffman
 mkHuffmanTree = huffmanTree . sort' . leafify
 
 huffmanTree :: [Huffman] -> Huffman
-huffmanTree [x] = x
+huffmanTree [x]       = x
 huffmanTree (x:(y:z)) = huffmanTree $ Node (val x + val y) x y : z
 
 sort' :: [Huffman] -> [Huffman]
@@ -46,5 +46,5 @@ toMap :: String -> Map.Map Char Int
 toMap = foldl (\a c -> Map.insertWith (+) c 1 a) (Map.empty :: Map.Map Char Int)
 
 val :: Huffman -> Int
-val (Leaf i _) = i
+val (Leaf i _)   = i
 val (Node i _ _) = i
