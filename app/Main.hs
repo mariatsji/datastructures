@@ -13,20 +13,18 @@ newtype AppConfig = AppConfig { cfgMaxDepth :: Int
 newtype AppState = AppState { stDeepestReached :: Int
 } deriving (Show)
 
-type App = ReaderT AppConfig (StateT AppState IO)
-
 newtype MyApp a = MyA {
     runA :: ReaderT AppConfig (StateT AppState IO) a
 } deriving (Functor, Applicative, Monad, MonadIO, MonadReader AppConfig,
   MonadState AppState)
 
-runApp :: App a -> Int -> IO (a, AppState)
+runApp :: MyApp a -> Int -> IO (a, AppState)
 runApp k maxDepth =
     let config = AppConfig maxDepth
         state = AppState 0
-    in runStateT (runReaderT k config) state
+    in runStateT (runReaderT (runA k) config) state
 
-constrainedCount :: Int -> FilePath -> App [(FilePath, Int)]
+constrainedCount :: Int -> FilePath -> MyApp [(FilePath, Int)]
 constrainedCount curDepth path = do
     contents <- liftIO . listDirectory $ path
     cfg <- ask
