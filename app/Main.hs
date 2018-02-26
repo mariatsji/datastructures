@@ -1,3 +1,5 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 module Main where
 
 import           Control.Monad.Reader
@@ -12,6 +14,11 @@ newtype AppState = AppState { stDeepestReached :: Int
 } deriving (Show)
 
 type App = ReaderT AppConfig (StateT AppState IO)
+
+newtype MyApp a = MyA {
+    runA :: ReaderT AppConfig (StateT AppState IO) a
+} deriving (Functor, Applicative, Monad, MonadIO, MonadReader AppConfig,
+  MonadState AppState)
 
 runApp :: App a -> Int -> IO (a, AppState)
 runApp k maxDepth =
