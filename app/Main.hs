@@ -14,7 +14,7 @@ newtype AppState = AppState { stDeepestReached :: Int
 } deriving (Show)
 
 newtype MyApp a = MyA {
-    runA :: ReaderT AppConfig (StateT AppState IO) a
+    runA :: StateT AppState (ReaderT AppConfig IO) a
 } deriving (Functor, Applicative, Monad, MonadIO, MonadReader AppConfig,
   MonadState AppState)
 
@@ -22,7 +22,7 @@ runApp :: MyApp a -> Int -> IO (a, AppState)
 runApp k maxDepth =
     let config = AppConfig maxDepth
         state = AppState 0
-    in runStateT (runReaderT (runA k) config) state
+    in runReaderT (runStateT (runA k) state) config
 
 constrainedCount :: Int -> FilePath -> MyApp [(FilePath, Int)]
 constrainedCount curDepth path = do
