@@ -1,13 +1,12 @@
 {-
 Hva gjør Haskell funksjonen fun med en liste med elementer av type a?
 -}
-
 fun :: Ord a => [a] -> [a]
-fun []        = []
-fun (x:xs)    = l ++ x:g
-    where l = fun [y | y <- xs, y <  x]
-          g = fun [y | y <- xs, y >= x]
-
+fun [] = []
+fun (x:xs) = l ++ x : g
+  where
+    l = fun [y | y <- xs, y < x]
+    g = fun [y | y <- xs, y >= x]
 {-
 
 a) Sorterer listen fra lav til høy
